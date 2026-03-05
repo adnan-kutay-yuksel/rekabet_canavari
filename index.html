@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ComplianceGuard v2</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f0f0f;--s:#1a1a1a;--b:#2e2e2e;
+  --t:#e8e8e8;--m:#666;--d:#999;--acc:#e8c547;
+  --r:#ff4d4d;--rd:rgba(255,77,77,.12);
+  --g:#4dff91;--gd:rgba(77,255,145,.10);
+  --o:#ff9a3c;--od:rgba(255,154,60,.12);
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--t);min-height:100vh;display:flex;flex-direction:column}
+.tb{background:#111;border-bottom:1px solid var(--b);padding:0 20px;height:48px;display:flex;align-items:center;gap:14px;flex-shrink:0}
+.tb-logo{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--acc);letter-spacing:.08em}
+.tb-sep{color:#333;font-size:18px}
+.tb-sub{font-size:11px;color:var(--d)}
+.tb-stats{margin-left:auto;display:flex;gap:16px}
+.stat{font-family:var(--mono);font-size:10px;color:var(--m)}
+.stat strong{color:var(--acc)}
+.layout{display:grid;grid-template-columns:1fr 330px;flex:1;height:calc(100vh - 48px);overflow:hidden}
+.compose{display:flex;flex-direction:column;border-right:1px solid var(--b);overflow:hidden}
+.ch{padding:12px 20px;border-bottom:1px solid var(--b);background:#131313}
+.ch span{font-family:var(--mono);font-size:11px;color:var(--m);letter-spacing:.06em}
+.fields{background:#131313;border-bottom:1px solid var(--b)}
+.fr{display:flex;align-items:center;gap:12px;padding:9px 20px;border-bottom:1px solid #1e1e1e}
+.fr:last-child{border-bottom:none}
+.fl{font-family:var(--mono);font-size:11px;color:var(--m);width:50px}
+.fi{background:transparent;border:none;outline:none;color:var(--t);font-size:13px;flex:1;font-family:var(--sans)}
+.fi::placeholder{color:#2a2a2a}
+.srow{padding:10px 20px;border-bottom:1px solid var(--b);background:#131313}
+.si{background:transparent;border:none;outline:none;color:var(--t);font-size:15px;font-weight:500;width:100%;font-family:var(--sans)}
+.si::placeholder{color:#2a2a2a}
+.ba{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
+#mb{flex:1;background:transparent;border:none;outline:none;color:var(--t);font-family:var(--sans);font-size:14px;line-height:1.75;padding:20px 24px;resize:none;width:100%;overflow-y:auto}
+#mb::placeholder{color:#2a2a2a}
+.cc{position:absolute;bottom:10px;right:16px;font-family:var(--mono);font-size:10px;color:#2a2a2a}
+.tbar{padding:10px 20px;border-top:1px solid var(--b);background:#111;display:flex;align-items:center;gap:10px}
+.bsend{font-family:var(--mono);font-size:11px;font-weight:600;padding:8px 20px;border-radius:4px;border:none;background:var(--acc);color:#000;cursor:pointer}
+.bsend:hover{opacity:.85}
+.bclear{font-family:var(--mono);font-size:11px;padding:8px 14px;border-radius:4px;border:1px solid var(--b);background:transparent;color:var(--m);cursor:pointer}
+.bclear:hover{border-color:#555;color:var(--t)}
+.lat{margin-left:auto;font-family:var(--mono);font-size:10px;color:#333}
+.lat span{color:var(--g)}
+.panel{display:flex;flex-direction:column;background:#111;overflow:hidden}
+.ph{padding:13px 16px;border-bottom:1px solid var(--b);display:flex;align-items:center}
+.pt{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--d);text-transform:uppercase}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--g);box-shadow:0 0 6px var(--g);margin-left:auto;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.arow{display:none;align-items:center;gap:6px;padding:8px 14px;font-family:var(--mono);font-size:10px;color:var(--acc);border-top:1px solid var(--b)}
+.arow.show{display:flex}
+.spin{width:10px;height:10px;border:1.5px solid #333;border-top-color:var(--acc);border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pb{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+.pb::-webkit-scrollbar{width:4px}
+.pb::-webkit-scrollbar-thumb{background:#222;border-radius:2px}
+.rc{background:var(--s);border:1px solid var(--b);border-radius:8px;padding:14px;transition:border-color .4s;display:none}
+.rc.high{border-color:rgba(255,77,77,.4)} .rc.med{border-color:rgba(255,154,60,.4)} .rc.low{border-color:rgba(77,255,145,.25)}
+.rl{font-family:var(--mono);font-size:10px;color:var(--m);margin-bottom:10px;letter-spacing:.08em;text-transform:uppercase}
+.rr{display:flex;align-items:flex-end;gap:8px;margin-bottom:12px}
+.rn{font-family:var(--mono);font-size:40px;font-weight:600;line-height:1;transition:color .4s}
+.rn.high{color:var(--r)} .rn.med{color:var(--o)} .rn.low{color:var(--g)}
+.rv{font-family:var(--mono);font-size:11px;padding-bottom:6px;transition:color .4s}
+.rv.high{color:var(--r)} .rv.med{color:var(--o)} .rv.low{color:var(--g)}
+.rbg{height:6px;border-radius:3px;background:#222;overflow:hidden}
+.rb{height:100%;border-radius:3px;width:0;transition:width .5s cubic-bezier(.4,0,.2,1),background .4s}
+.rb.high{background:var(--r)} .rb.med{background:var(--o)} .rb.low{background:var(--g)}
+.sdet{font-family:var(--mono);font-size:10px;color:var(--m);margin-top:8px;line-height:1.6}
+.ctx-hits{margin-top:6px;display:flex;flex-wrap:wrap;gap:4px}
+.ctx-tag{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px}
+.ctx-tag.viol{background:rgba(255,77,77,.15);color:#ff6666;border:1px solid rgba(255,77,77,.2)}
+.ctx-tag.safe{background:rgba(77,255,145,.1);color:#4dff91;border:1px solid rgba(77,255,145,.15)}
+.sl{font-family:var(--mono);font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.08em;display:none}
+.sl.show{display:block}
+.sw{display:flex;flex-wrap:wrap;gap:5px}
+.st{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:3px;border:1px solid transparent;cursor:default}
+.st.hot{background:var(--rd);border-color:rgba(255,77,77,.3);color:var(--r)}
+.st.warm{background:var(--od);border-color:rgba(255,154,60,.3);color:var(--o)}
+.st.cool{background:#141414;border-color:#222;color:#444}
+.vd{border-radius:8px;padding:12px 14px;display:none;align-items:center;gap:10px;border:1px solid transparent;transition:all .4s}
+.vd.show{display:flex}
+.vd.danger{background:var(--rd);border-color:rgba(255,77,77,.25)}
+.vd.warn{background:var(--od);border-color:rgba(255,154,60,.2)}
+.vd.clear{background:var(--gd);border-color:rgba(77,255,145,.2)}
+.vi{font-size:20px;flex-shrink:0}
+.vt{font-size:11px;line-height:1.5}
+.vt strong{display:block;font-size:12px;margin-bottom:2px}
+.vd.danger .vt strong{color:var(--r)} .vd.warn .vt strong{color:var(--o)} .vd.clear .vt strong{color:var(--g)}
+.empty{text-align:center;padding:30px;color:#2a2a2a}
+.empty .ico{font-size:28px;margin-bottom:10px;opacity:.4}
+.empty p{font-family:var(--mono);font-size:11px;line-height:1.7;letter-spacing:.04em}
+.sec{padding:0 14px 14px;flex-shrink:0;border-top:1px solid var(--b)}
+.seclbl{font-family:var(--mono);font-size:10px;color:#2a2a2a;letter-spacing:.08em;text-transform:uppercase;padding:10px 0 8px}
+.sbtn{display:block;width:100%;text-align:left;background:#141414;border:1px solid #1e1e1e;border-radius:5px;padding:7px 10px;margin-bottom:4px;cursor:pointer;font-size:11px;font-family:var(--sans);color:#3a3a3a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:all .15s}
+.sbtn:hover{background:#1a1a1a;border-color:#2a2a2a;color:var(--d)}
+.sbtn.d:hover{border-color:rgba(255,77,77,.3);color:var(--r)}
+.sbtn.s:hover{border-color:rgba(77,255,145,.2);color:var(--g)}
+</style>
+</head>
+<body>
+<div class="tb">
+  <span class="tb-logo">COMPLIANCE<span style="color:#fff;opacity:.2">GUARD</span></span>
+  <span class="tb-sep">|</span>
+  <span class="tb-sub">v2 · Bağlam Duyarlı Model · 2289 Örnek</span>
+  <div class="tb-stats">
+    <span class="stat">Accuracy: <strong>94.8%</strong></span>
+    <span class="stat">ROC-AUC: <strong>0.990</strong></span>
+    <span class="stat">Model: <strong>SVM</strong></span>
+  </div>
+</div>
+<div class="layout">
+  <div class="compose">
+    <div class="ch"><span>YENİ E-POSTA — Compliance Kontrolü Aktif</span></div>
+    <div class="fields">
+      <div class="fr"><span class="fl">Kimden</span><input class="fi" value="siz@sirket.com.tr" readonly></div>
+      <div class="fr"><span class="fl">Kime</span><input class="fi" id="toF" placeholder="alici@ornek.com"></div>
+    </div>
+    <div class="srow"><input class="si" id="sjF" placeholder="Konu"></div>
+    <div class="ba">
+      <textarea id="mb" placeholder="Mail içeriğini yazın...&#10;&#10;Sağdan hazır örnek seçin veya kendiniz yazın."></textarea>
+      <span class="cc" id="cc">0 karakter</span>
+    </div>
+    <div class="tbar">
+      <button class="bsend" onclick="doSend()">GÖNDER</button>
+      <button class="bclear" onclick="doClear()">TEMİZLE</button>
+      <span class="lat">inference: <span id="lv">—</span></span>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="ph"><span class="pt">Compliance Analizi</span><span class="live-dot"></span></div>
+    <div class="arow" id="ar"><div class="spin"></div>ANALİZ EDİLİYOR...</div>
+    <div class="pb">
+      <div class="empty" id="emp"><div class="ico">⟳</div><p>Yazmaya başlayın.<br>Bağlam duyarlı model<br>anlık analiz yapar.</p></div>
+      <div class="rc" id="rc">
+        <div class="rl">RİSK SKORU</div>
+        <div class="rr"><span class="rn" id="rn">0</span><span class="rv" id="rv">—</span></div>
+        <div class="rbg"><div class="rb" id="rb"></div></div>
+        <div class="sdet" id="sd"></div>
+        <div class="ctx-hits" id="ctx"></div>
+      </div>
+      <div class="sl" id="sigl">TF-IDF Sinyal Kelimeler</div>
+      <div class="sw" id="sw"></div>
+      <div class="vd" id="vd"><span class="vi" id="vi">○</span><div class="vt"><strong id="vts">—</strong><span id="vds">—</span></div></div>
+    </div>
+    <div class="sec">
+      <div class="seclbl">Test Örnekleri</div>
+      <button class="sbtn d" onclick="ls('f')">🚨 Rakiplerle fiyat sabitleme</button>
+      <button class="sbtn d" onclick="ls('p')">🚨 Bölge paylaşımı</button>
+      <button class="sbtn d" onclick="ls('i')">🚨 İhaleye fesat</button>
+      <button class="sbtn d" onclick="ls('b')">🚨 Stratejik bilgi alışverişi</button>
+      <button class="sbtn s" onclick="ls('m1')">✅ Bağımsız fiyat artışı</button>
+      <button class="sbtn s" onclick="ls('m2')">✅ Rakip fiyat takibi (kamuya açık)</button>
+      <button class="sbtn s" onclick="ls('m3')">✅ Etik ihale hazırlığı</button>
+    </div>
+  </div>
+</div>
+<script>
+// ═══════════════════════════════════════════════
+// GERÇEK MODEL — 2289 örnekle eğitildi
+// TF-IDF + Karakter n-gram + Bağlam özellikleri
+// ═══════════════════════════════════════════════
+const W  = {"feragat":1.2600867744195654,"musteri listesi":1.0559637570242995,"cover":1.0027449943742397,"onlarin":0.8374456588986539,"rakiplerle":0.7824727926270667,"paylasimi":0.7520240877165882,"ayni":0.7494329175592442,"onemli":0.7435810159193144,"gama":0.6649883838404976,"prim":0.6407934887890954,"rotasyon":0.633754300533621,"kazanan":0.6314499650650411,"konustuk":0.6210377060760672,"bey uretim":0.6147781108462903,"fiyat sabitleme":0.6010335471602465,"sabitleme":0.6010335471602465,"bilgisi":0.5977134842486771,"eta":0.5916563355223536,"teklifleri":0.5900935225456709,"net":0.5844637590119631,"lokasyon":0.5760197200700808,"kontrolu":0.5597761957857424,"ogrendim":0.5540315824654783,"koordinasyonu":0.549229654072519,"zeta":0.5486833723558648,"cover teklif":0.5281341542794019,"kanalinda":0.522230471824893,"dondurma karari":0.5221850505719958,"dondurma":0.5200569713008193,"musterilerine":0.510818156889946,"kimse":0.4949258107623417,"esitledik":0.492581849968262,"fiyati":0.49169200638799504,"mudahale":0.49059991830368493,"musterileri":0.4852323077681002,"beta":0.48349116820533267,"verildi":0.4704948492236056,"bahsetti":0.4694650348793839,"stok":0.46920710104129004,"anlasmasi":0.4656073894569511,"ihaleye":0.4626354261146422,"biraz":0.4603717526835451,"herkes":0.46007822513007074,"musterilerine teklif":0.45994923928636,"tarih":0.455506325279767,"tutmak":0.45390907838429323,"tutmak icin":0.45390907838429323,"edelim":0.4508043091538401,"donduralim":0.4493093723312547,"alin":0.4459618729754636,"bazinda":0.4435774047122958,"eta yla":0.4413758097192667,"gitmeme":0.44128012694685426,"portfoy":0.43909671479303425,"yla":0.43760877303278506,"kanal":0.4375335563917204,"ar ge":0.43663017884630795,"karsiligi":0.4319359328881167,"zeta nin":0.42824027061297254,"bir toplanti":0.42790950549692797,"ayarladik":0.42525768412756954,"sahibi":0.4211341805375796,"icin herkes":0.41836426020409384,"urun grubu":0.4166068621967501,"planlarindan":0.4140062121665267,"planlarindan bahsetti":0.4140062121665267,"kanal paylasimi":0.4137731409947707,"bizim":0.4108847973050009,"veli bey rotasyon":0.41088308943089236,"bey rotasyon":0.41088308943089236,"ile fiyat":0.40225604217455463,"yeni siparis":0.40220200040516174,"yurt disi":0.40127334748107807,"anlasmasi tamam":0.39595801985927725,"fiyat anlasmasi":0.39595801985927725,"fiyat anlasmasi tamam":0.39595801985927725,"havuz":0.3946441916824224,"sart":0.39228117733240375,"delta":0.39223842056741876,"paylasildi":0.3918843679421009,"onceden":0.38877916549569325,"grubu":0.3884902463859665,"ulastik":0.38828146780650347,"ortak":0.38515535154003794,"araya":0.3822173964437992,"alfa":0.3818821258934846,"gorusmede":0.3817032873975341,"yurt":0.3796737550335907,"bey rakiplerle":0.37844016319859947,"senin":0.3764887971239263,"anlatti":0.37567888133056565,"rakipler":0.37481410978958946,"gizli":0.3744414036850094,"herkes hemfikir":0.3742456006892102,"hemfikir":0.3737189392019036,"lansman":0.3687018097836358,"icin konustuk":0.3682700967444945,"biraktik":0.3672436349853997,"bugunku":0.3669158528946704,"nin":0.3656605411861647,"yatirim":0.3643701834502693,"portfoyumuz":0.3605489165751146,"anlastik onlar":0.36041577401418506,"disi":0.3600302128942131,"onceden belirledik":0.3599316017571041,"maliyetimizi":0.35758451726369195,"gondermis":0.3559987857482188,"kapasitesi":0.3523955157268102,"ton":0.3523955157268102,"plani":0.3523257188097043,"hakkinda":0.3507042134455372,"tam":0.3494321520332554,"netlestirdik":0.3488680559466448,"sagladik":0.3483093368902416,"10 milyon":0.34686596992911833,"yaptigimiz":0.3461249313681402,"payini":0.3447905728440433,"buna gore":0.3434652501831991,"rakiplerle esitledik":0.34277609404324777,"bize":0.33818383759529963,"birine":0.33797213493018635,"senkronize":0.33690705481880356,"bey buyume":0.33620240941134244,"fabrika":0.33498424976981267,"portfoyu":0.33459048492694404,"maliyet yapisi":0.33414233708767677,"birlikte":0.33221969801494394,"yapmasin":0.33204163992868535,"yukari":0.33196963537081037,"280 tl":0.33194243429517295,"280":0.33194243429517295,"firmaya":0.3300991359967429,"rakip firmaya":0.3300991359967429,"sozu":0.3294757592266295,"ogrendik":0.32791927366561835,"hep":0.32764532105837113,"hep birlikte":0.32764532105837113,"sabit":0.3274069268108308,"aktardik":0.3269265219166771,"detaylari":0.32494439861522767,"gama ticaret":0.32410346885476005,"ucret":0.32317947192045954,"buyume":0.3229451189234987,"belirleme karari aldik":0.3215064702943725,"belirleme karari":0.3215064702943725,"yapisi":0.32128243046385635,"is karsiligi":0.31881664651477176,"pazar payini":0.31786751498477633,"sorun olmaz":0.31776340098789824,"bey teklifleri":0.31776340098789824,"ihaleye fesat":0.317650784024196,"fesat":0.317650784024196,"bir araya":0.31602157545705706,"yoneticileriyle":0.3156608131118861,"firma yoneticileriyle":0.3156608131118861,"firma yoneticileriyle bir":0.3156608131118861,"rakip firma yoneticileriyle":0.3156608131118861,"yoneticileriyle bir":0.3156608131118861,"toplantida fiyat":0.31544504124496264,"onlarin maliyet":0.31543311761618253,"uzerinde":0.3144023003568249,"taseron":0.314361058869551,"mutabik":0.3131050016368959,"segmenti":0.31267236125911396,"150":0.31210956585304395,"toplantida":0.3120823006651528,"rakibe":0.31118179168131394,"kampanya":0.3108241505811254,"mehmet bey uretim":0.30863564315650843,"110 tl":0.30836304723291436,"sizinkini":0.30836304723291436,"110":0.30836304723291436,"kazandi":0.3068178540313066,"alabiliriz":0.30590704949877123,"listesini":0.30565913598892247,"hakkinda bilgi":0.3019729366888272,"etmek":0.2999630557113298,"ayse hanim rakiplerle":0.2986978833776851,"anlastik":0.2985929018527616,"milyon":0.2964663510433755,"konusacagiz":0.29629678829773587,"izmir":0.2953966836379556,"olduk":0.2949485965262859,"firma":0.294033826666724,"biz sadece":0.29394859795078115,"yapacaklarini":0.2931972914080153,"piyasa barisi":0.29210219783893737,"rakiplerimizle":0.2915884367268887,"sizde":0.29130476456295357,"paylastik":0.29054217163244633,"iskontoyu":0.2901956578799062,"olmaz":0.28829728821213085,"bey delta":0.28767738567408024,"fiyat artis":0.2871540580403981,"buna":0.2870502359877117,"yeni fabrika":0.2857691845263709,"kâr":0.28562906044059266,"siz de":0.28506527948169275,"konustugumuz":0.2849593773861033,"bey musteri":0.2845556586457982,"ile anlastik onlar":0.28378185647250187,"barisi":0.2821880497391059,"eta holding":0.2821635783570156,"holding":0.2821635783570156,"rakiple":0.2821505729208916,"indirim":0.279771486673085,"musteri":0.27902698674150433,"rekabeti":0.278640698506849,"veli bey bayi":0.2778841159285584,"karistirma suclamasiyla":0.27722241551104787,"suclamasiyla":0.27722241551104787,"fesat karistirma suclamasiyla":0.27722241551104787,"semt bazinda":0.2772189739256481,"bolgesi":0.27718869043983396,"gosterdik":0.27523805128579093,"ihaleyi":0.273885634094749,"rakibi":0.27377316909948657,"merhaba ekip":0.27343113836166766,"semt":0.2730056081057547,"icin rakibimizin":0.27294873080044857,"icin rakibimizin teklifini":0.27294873080044857,"veli bey ihaleyi":0.27294873080044857,"rakibimizin teklifini":0.27294873080044857,"rekabet etmek":0.27249323523806446,"cekelim":0.2719762960144291,"hanim rakiplerle":0.27186669615116277,"danisikli olarak":0.27152245509043516,"zeta ya":0.2700867038433718,"yuzde":0.2697764881697616,"kâr marji":0.2675455504361676,"bey ihaleye":0.2651571821510548,"patent bilgisi":0.26482174959208543,"planimiz":0.26171407781589834,"ya biz":0.26061565098786715,"biz ankara":0.26061565098786715,"ya odaklanalim":0.26061565098786715,"hakkinda fikir":0.259624742944742,"miyiz":0.2578177012494215,"koordineli":0.25761351037378516,"koordine":0.2575045071423846,"bugunku sektor":0.2570480411463514,"rakibimizle":0.25496391550274927,"bey ihaleyi":0.25429579206615605,"piyasa":0.25261879483990246,"ortak bir":0.2525275470730282,"mehmet bey rakiplerle":0.2523774407214576,"ebru hanim":0.2522136082148097,"bolelim":0.2515623900810273,"danisikli":0.25050880300287576,"de benzer bir":0.2499227052858797,"biz de benzer":0.2499227052858797,"konustugumuz gibi":0.24983774381252793,"ile kampanya":0.2498013936996037,"belirlemeliyiz":0.24958955945039626,"ebru hanim ihalede":0.2489836079415438,"birimimiz":0.24878295657938276,"hukuk birimimiz":0.24878295657938276,"kampanya donemini senkronize":0.24861646877070817,"donemini senkronize ettik":0.24861646877070817,"donemini senkronize":0.24861646877070817,"kurduk":0.24800049515396919,"ozel sektoru":0.2479245849079451,"varmis":0.2476417377247173,"ile yaptigimiz":0.24734260724345242,"marj":0.24654236560238552,"bilgileri":0.24636001203589708,"es zamanli":0.24597561851319832,"zamanli":0.24597561851319832,"yapalim":0.24559214593023873,"boylece":0.2445736677594752,"asgari":0.24415651220367268,"aktaracagiz":0.24405651109651172,"gelismeleri aktaracagiz":0.24405651109651172,"ahmet bey":0.2428358254360415,"ekip sektordeki":0.24234748368210488,"merhaba ekip sektordeki":0.24234748368210488,"koordineli zam":0.24213657245036938,"koordinasyon tamam":0.24201435621691164,"kullanabiliriz":0.24130819759984437,"fiyatlari yukari":0.2401374323781622,"siparis":0.23972444809924218,"nerede":0.23889935213379784,"90 tl":0.23850280717582503,"birak":0.23838288169411673,"firmalarla":0.23818049549263642,"maliyet avantaji":0.2381109202561579,"sanayi ile fiyat":0.23794834197925216,"paylasimi tamam":0.23771186861110455,"karistirma suclamasiyla ilgili":0.23652532050054076,"suclamasiyla ilgili":0.23652532050054076,"beta ya":0.23644883335165048,"piyasada":0.23636585692358647,"zincir":0.23629901458085018,"sektorune":0.2344862678788274,"taseron anlasmasi":0.23429640287183506,"sektordeki":0.2333188943686835,"isi":0.23327062097773707,"hangi":0.23282858743980717,"firmasinin":0.23272640761009333,"veli bey ihaleye":0.232208271610674,"sagladik onlar":0.23215058989235896,"hizlandiralim":0.23205656408074504,"urun paylasimi":0.2303482398260864,"oldugunu soyledi":0.2299297335614477,"bey delta sanayi":0.2294008485773424,"donemini":0.2292585843751952,"senkronize ettik":0.2292585843751952,"kampanya donemini":0.2292585843751952,"fiyati yuksek":0.22883324173679787,"yarinki ihale":0.22883324173679787,"ihale komisyonunda":0.22837668010564982,"komisyonunda":0.22837668010564982,"ihalede rakip":0.2279799441244781,"pazarina":0.22697922012101354,"bozulma olmasin":0.22541373215313396,"bozulma":0.22541373215313396,"bizim eski":0.22541373215313396,"muduruyle":0.22468496188311246,"planimizi":0.22458542709016574,"kritik":0.22447095804460668,"ogrendik onumuzdeki":0.22408186618746564,"bizim de":0.2240577840810616,"gelismeleri":0.22345753927218348,"bey eta holding":0.22327653352922897,"de benzer":0.2229832412668034,"hanim ihalede":0.22191742459041566,"birakiyoruz":0.22149445088703978,"abd":0.22144746441260418,"ayse hanim":0.2205168170360024,"lutfen":0.22022676752442444,"kâri":0.21949105450737924,"mi onlarin":0.21877456396394915,"200":0.2181427708515853,"gerektigi":0.21711890865912284,"lutfen bu":0.21673838866783496,"aramizda":0.21673838866783496,"belirleme":0.2163484600012208,"satis yapacagiz":0.21591528797606305,"onlarin musterilerine":0.21588043766851156,"bey ihaleye fesat":0.2157468883541538,"akdeniz bolgesi":0.21550679554875793,"surec":0.21535738278453323,"koordinasyonu tamam":0.21510635704749645,"hareket edip":0.21485350641482046,"oranimiz":0.21469877355361322,"bey ile":0.21416529139181872,"fesat karistirma":0.21405839224768053,"ihaleye fesat karistirma":0.21405839224768053,"karistirma":0.21405839224768053,"koruma":0.21393686018734265,"hedeflerimizi paylastik":0.21351615819276681,"de ayni":0.21344417830140652,"gama da":0.21319509450684554,"bid":0.21319509450684554,"cover bid":0.21319509450684554,"bey musteri listesini":0.21304070416919607,"musteri listesini gondermis":0.21304070416919607,"listesini gondermis":0.21304070416919607,"alfa as":0.21294142929086804,"serbest":0.21227402052567132,"patent":0.21223526544511448,"bilgiyi fiyat politikamizi":0.2109325453705479,"gore onlarin maliyetleri":0.2109325453705479,"onlarin maliyetleri":0.2109325453705479,"fiyat politikamizi belirlerken":0.2109325453705479,"politikamizi belirlerken":0.2109325453705479,"politikamizi belirlerken kullanabiliriz":0.2109325453705479,"bilgiye":0.2109325453705479,"bilgiye gore":0.2109325453705479,"bilgiye gore onlarin":0.2109325453705479,"bilgiyi fiyat":0.2109325453705479,"belirlerken kullanabiliriz":0.2109325453705479,"bu bilgiyi fiyat":0.2109325453705479,"gore onlarin":0.2109325453705479,"paylasalim":0.2107481644611369,"gereksiz":0.21053914635004856,"dengeleri":0.2093680046717585,"mevcut dengeleri":0.2093680046717585,"uygulanacak fiyat":0.2089308525529137,"caner bey delta":0.20803542668228803,"ikimiz":0.20776635250821648,"sorusturma":0.2076799738349499,"bolge paylasimi":0.20746824813872333,"sektordeki tum":0.20686008354544444,"urunlere":0.20651388986231148,"kazanc havuzu kurduk":0.20623555676457542,"kazanc havuzu":0.20623555676457542,"toplantisinda":0.2059412790375073,"cekildiler":0.20536774287737436,"uymayan":0.20526112472196117,"bir bilgi":0.2047055924696216,"rakiplerle yapilan":0.2045404891327296,"ekip beta":0.2044187689201698,"ekip beta ile":0.2044187689201698,"merhaba ekip beta":0.2044187689201698,"fiyat politikamizi":0.20281452937463343,"gerektigi konusuldu":0.20274108977664707,"gizli bir":0.20214918102566498,"hasan bey eta":0.20195397713409902,"birbirimizin":0.20137469877826267,"uygulanacak":0.20122779436471677,"anlasmayi":0.20113027893776525,"beta ile anlastik":0.20104100370808398,"karar onumuzdeki":0.1996633078933469,"oldugumuzu":0.19921705040738866,"ticaret ile":0.19852970186065533,"gama ticaret ile":0.19852970186065533,"le es zamanli":0.19770689937417416,"le es":0.19770689937417416,"gama firmasinin":0.19757895919521987,"girmemesi":0.1974638956128632,"girmemesi icin":0.1974638956128632,"ihaleye girmemesi":0.1974638956128632,"ihaleye girmemesi icin":0.1974638956128632,"kanallarini paylastik":0.1974104008388563,"satis kanallarini":0.1974104008388563,"satis kanallarini paylastik":0.1974104008388563,"ile gorustum":0.19718959453146487,"fiyatlarla":0.19718359824558954,"kamu":0.19714097985808704,"hedeflerimizi":0.1968912695548319,"gitmiyoruz":0.19627407561462398,"maliyetler":0.19561383867624665,"tehdit":0.19542128291620564,"tehdit ettik":0.19542128291620564,"icin tehdit ettik":0.19542128291620564,"icin tehdit":0.19542128291620564,"havuzu":0.19460085994522092,"kazanc":0.19460085994522092,"havuzu kurduk":0.19460085994522092,"ozel sektor":0.19409833930265424,"ortak hareket":0.19385978996927267,"yarinki":0.19361419534800545,"bizim musterilerimize":0.1935505386682358,"yapilan":0.1930014188789112,"fiyatla":0.19269863194588988,"pay":0.19264605476248944,"parayi":0.19223005601207802,"dedik":0.19196119359521965,"katiliyor":0.19166526773958983,"rakibi ihaleye":0.19105410335279577,"is birligi yapalim":0.1908421244707517,"birligi yapalim":0.1908421244707517,"sirasi":0.1903303811191915,"guncel":0.19008317781630651,"olarak bir":0.19004815511834958,"hanim yurt":0.19003805390684697,"yurt disi bolgeleri":0.19003805390684697,"hanim yurt disi":0.19003805390684697,"disi bolgeleri":0.19003805390684697,"ekim":0.18989425561700504,"kâr bolusumu":0.1894971018335944,"ile yaptigimiz ikili":0.18929766010606738,"ikili":0.18929766010606738,"ikili gorusmede":0.18929766010606738,"yaptigimiz ikili gorusmede":0.18929766010606738,"yaptigimiz ikili":0.18929766010606738,"kurmaya":0.1886182016214678,"bulundugumuz":0.18848354707612153,"karistirma girisiminde":0.18848354707612153,"girisiminde":0.18848354707612153,"karistirma girisiminde bulundugumuz":0.18848354707612153,"iddiasiyla ilgili":0.18848354707612153,"fesat karistirma girisiminde":0.18848354707612153,"bulundugumuz iddiasiyla":0.18848354707612153,"girisiminde bulundugumuz iddiasiyla":0.18848354707612153,"iddiasiyla":0.18848354707612153,"bulundugumuz iddiasiyla ilgili":0.18848354707612153,"rekabet kurulu na":0.18848354707612153,"girisiminde bulundugumuz":0.18848354707612153,"alacak firma":0.1883130349041756,"firma belli":0.1883130349041756,"alacak firma belli":0.1883130349041756,"bolusumu":0.18780329413519387,"bey teklif":-0.8296796131575003,"hanim musteri":-0.8286398315902666,"fiyat listesi":-0.8139759332201755,"fuar":-0.764791931906014,"bey kampanya":-0.7483897583027287,"pilot":-0.7453762746932848,"yatirimci":-0.7377790110723529,"konferans":-0.7106897235632309,"kamuoyu":-0.7055522792588397,"bagimsiz":-0.7003581359576866,"ortak girisim":-0.6807546578085227,"girisim":-0.6807546578085227,"yeni":-0.6736063062967527,"enflasyon":-0.6719001852319237,"hasan bey kampanya":-0.635902154117375,"musteri geri":-0.6236604070949296,"bey maliyet":-0.621065841981921,"bolge":-0.6054156735536685,"musteriye":-0.6007147156962885,"bey yeni":-0.5833018647215243,"kapasite sinirli":-0.5755686825536994,"kontrol ettim":-0.5531447326598956,"ayse hanim ihale":-0.5525245939332176,"geri":-0.5516050066670038,"seffaflik":-0.5477613754819924,"firma ile":-0.5477126368345744,"ihale":-0.5464161651404411,"hanim ihale":-0.5353702546834836,"yeni fiyat":-0.5325340720530186,"maliyet":-0.531463440141228,"genel":-0.5271544645887377,"evrak":-0.5266212763716996,"musteri teklifini":-0.5198703868732907,"tedarikci":-0.5185899781453401,"halka acik":-0.4964154892214536,"rakiplerimizin":-0.4964148527465365,"ebru hanim musteri":-0.4963035046790652,"once":-0.4932045909766251,"halka":-0.4864138535728502,"dogrultusunda":-0.4863579262123571,"paylasiyorum":-0.4844371990516759,"gonderildi":-0.47956327598330417,"kullanildi":-0.4723297698003068,"son ihalede":-0.4684590598581734,"inceleyelim":-0.46450738131083585,"bey satis":-0.4643363508371549,"raporunu":-0.4583841528146716,"olan":-0.45781145144850544,"fiyat":-0.451184809863805,"etik":-0.44247193414761227,"sektorun":-0.4413507813772568,"merhaba yeni":-0.44067977225465504,"net bir":-0.4392524783344696,"teklif fiyati":-0.4380019670010431,"paylasim":-0.4332533866427275,"hanim yeni fiyat":-0.4265567875984022,"analiz":-0.42585746958891507,"ekiple paylasiyorum":-0.42391990030498095,"yeni fiyat listesi":-0.42110572784205413,"yuzunden":-0.41819738003151535,"doguya":-0.41767605827998905,"ettim":-0.41634178389971915,"acik":-0.41579318653384917,"ektedir":-0.4148523234768507,"bey fiyat":-0.4137625928098199,"hanim yeni":-0.41331339549588864,"sundugumuz":-0.41159369807336893,"itiraz":-0.4109974399530672,"fiyat revizyonu":-0.40841266494689193,"ettik fiyat":-0.4072248620797104,"veli bey teklif":-0.4071864030403261,"ekiple":-0.4034380845353128,"surecini":-0.398924039964563,"rakibin":-0.39830739740581605,"dilekcesi":-0.3981254679193533,"ayse hanim musteri":-0.3971640000015269,"yeni bir":-0.39665193755468997,"etkisiyle zam":-0.39600692117550523,"etkisiyle":-0.39600692117550523,"hafta":-0.39534096060570895,"kampanya planimizi":-0.3950744294926681,"hazirladik":-0.39443839212726045,"kâr dagitim":-0.3944296266394327,"muduru":-0.39267465739116203,"kontrol":-0.39203855223404205,"notu":-0.3864019955752533,"bir sorun":-0.38619883418086615,"imzaladik":-0.38542948656067605,"sektor":-0.38453342713576055,"rekabet hukuku":-0.38362812875004054,"hukuku":-0.38362812875004054,"marmara da":-0.3833771879540533,"ege":-0.38178901354870914,"toplantisi":-0.3816932391240346,"fiyat stratejisi":-0.38168301954354367,"dagitim":-0.3791848988413873,"paylasmayalim":-0.3772738761068252,"anlasmasi imzaladik":-0.37699074251975306,"stratejisi":-0.372243018613285,"bey ic":-0.36994452154392593,"revizyonu":-0.36902477623699503,"analiz ettik":-0.36864933072882816,"hanim fiyat listesi":-0.3676930366079465,"oranlari":-0.3670631095242564,"acaba":-0.36553595441985415,"bir is":-0.3649519761287654,"tum":-0.3648698547432594,"specs":-0.360863116294278,"rekabetci":-0.3590983397283404,"yurtdisi":-0.35718035879276633,"sikayetimizi":-0.3568279648153319,"plan":-0.3548349774275482,"ebru hanim fiyat":-0.3535418872557875,"pazar arastirmasi":-0.35327322942767897,"calismasi":-0.35305396594909466,"reklam":-0.3528471269594827,"payi":-0.3504940736221713,"lojistik":-0.34812856469431946,"yarin":-0.34782836411900764,"bey ihale":-0.3478020799382625,"fiyat guncellemesi":-0.3469686647070645,"marka":-0.34636453103586,"dosyasi":-0.3463484949582664,"maili":-0.34546198488303537,"arastirmasi":-0.34442132335691,"son":-0.3439108521982774,"sectik":-0.34246323063214745,"pilot proje":-0.34126230756021836,"hanim teklif":-0.33994829103600027,"ayse hanim teklif":-0.33994829103600027,"yapti":-0.3391441325338904,"birimi":-0.3367698619311764,"ges":-0.33638616801931087,"guncellemesi":-0.3350464672378289,"satis":-0.33504604627775825,"yaptik indirim":-0.3346880564300654,"alanlar":-0.3331565595361747,"dikkatli":-0.3311735554851708,"dikkatli olalim":-0.32885914166420976,"yaptim":-0.3284785190845661,"netlestirelim":-0.3281703994269994,"hanim fiyat":-0.32725356010704765,"gelen":-0.32708878154534826,"basliyor":-0.326704372874381,"bos":-0.32589776589930647,"hasan bey yeni":-0.3253981938161167,"toplantisi planlandi":-0.32358190317329183,"ayse hanim yeni":-0.32213372245185357,"resmi":-0.32165745003455976,"hazirladim":-0.32138299365445483,"soz konusu":-0.3205019828261338,"herhangi":-0.31854354649740096,"herhangi bir":-0.31854354649740096,"icin bir":-0.31729700079756906,"artti":-0.31696971932918994,"asamasinda":-0.31646209264822056,"cikardik":-0.31588261146967395,"arastiriyoruz":-0.3157996919901903,"bildirimi":-0.31543363272594777,"gozden":-0.31486265324460927,"fuar notlarini":-0.31383524263673723,"planlandi":-0.3111284287161633,"sisteme":-0.3109698074326607,"bey ihale icin":-0.30922263014901946,"teklifini":-0.3089878226991373,"bildirimimizi":-0.308724621662691,"konusu":-0.3081670431479813,"notlarini":-0.30672303043465204,"taksit":-0.30632326491347983,"veli bey maliyet":-0.30603075142487685,"raporu":-0.30430529625790015,"sinirli":-0.3029320338082708,"calisanlarimiza":-0.3026011812161956,"rakibimiz":-0.3019270030460289,"maliyetlerimizde":-0.3014707779163429,"iki":-0.30072238123151085,"gelecek hafta":-0.2998212739891374,"analizine gore":-0.2987348704067427,"analizine":-0.2987348704067427,"icin teknik":-0.298428024846189,"mesru":-0.2981253683843934,"yuklendi":-0.2974892933485623,"inceledim":-0.29748612977274164,"kap":-0.2968429491944256,"gorusup":-0.2959756009534907,"zayif":-0.2946596014773338,"bati bolgeleri":-0.29364244928650807,"oncelik":-0.29322744852631477,"sektordeki diger":-0.2921638875907263,"ilgili bilgi":-0.2916095323025385,"gelistirdik":-0.29124371060597165,"musterilere":-0.29072672813691947,"sadece":-0.29059954695194684,"suresi":-0.28851357624477264,"rakipsiz":-0.2876982598610731};
+const IC = -0.18983717859470756;
+
+// Bağlam pattern'leri (Python'daki ile aynı)
+const VIOL_PAT = ["rakiplerle.{0,40}(fiyat|zam|indirim|iskonto).{0,30}(anlastik|mutabik|koordine|netlestirdik|sabitledik)", "fiyat.{0,20}(sabitledik|sabitleme).{0,20}(rakip|sektor|piyasa|hep)", "(hepimiz|herkes|tum firmalar).{0,30}(ayni fiyat|es zamanli zam|birlikte zam)", "es zamanli.{0,20}(zam|fiyat degisiklik|indirim).{0,30}(rakip|sektor|koordine)", "iskonto.{0,20}(sinirladik|yasak|koordine).{0,20}rakip", "liste fiyat.{0,20}(altina inmeyecegiz|asmayin|taban).{0,20}(rakip|hep|sektor)", "(bolge|pazar|musteri).{0,15}paylastik", "(bizim|bize ait).{0,15}(bolge|pazar|musteri).{0,20}(onlar|rakip|beta|alfa|gama)", "rakip.{0,20}(musteri|bolge).{0,20}(gitmeyecegiz|teklif.{0,10}vermeyecegiz|girmeyecegiz)", "(kuzey|guney|dogu|bati|istanbul|ankara|izmir|ege|marmara).{0,30}(biz|onlar|rakip).{0,30}(kalacak|olacak|ait)", "pazar.{0,10}ikiye.{0,10}bolduk", "(gostermelik|dolgu|sahte).{0,15}teklif", "ihale.{0,25}(koordine|sabitledik|anlastik).{0,20}rakip", "rakip.{0,20}ihale.{0,20}(girmeyecek|feragat|birakmali|cekiliyor)", "sira.{0,10}(bizim|onlarin|onlarda|bizde).{0,20}ihale", "danisikli.{0,20}(teklif|ihale|plan)", "rakip.{0,20}(maliyet|stok|kapasite|uretim.{0,10}plan|fiyat.{0,10}list).{0,20}(verdik|aldik|paylastik|ogrendik|ilettik)", "gizli.{0,15}bilgi.{0,15}(alısveris|paylasim|teatisi|aktardik)", "rakiplerle.{0,20}(ic|gizli|stratejik).{0,20}(veri|bilgi|rapor).{0,20}(paylastik|degis)"];
+const SAFE_PAT = ["(bagımsız|tek tarafli|kendi basimiza).{0,30}(karar|fiyat|strateji|belirle)", "yalnizca.{0,25}(kendi|ic|sirket).{0,30}(maliyet|hedef|marj|strateji)", "tamamen.{0,20}(kendi|ic|lojistik|kapasite|teknik|bagımsız).{0,25}(karar|planlama|sorun|kaynak)", "rakiplerle.{0,10}hicbir", "rakiplerle.{0,50}(yok|hayir|olmadi|yapilmadi|katilmiyoruz|bulunmuyoruz)", "hicbir.{0,20}(bilgi|koordinasyon|anlasma|iletisim).{0,20}(yok|olmadi|yapilmadi|bulunmuyor)", "rakip.{0,20}(bilgi|koordinasyon).{0,20}(yoktur|yok|bulunmuyor|paylasimi yok)", "(tuik|istatistik|rapor|arastirma|kamusal).{0,30}(gore|dogrultusunda|kaynak)", "kamuya.{0,10}(acik|sunulmus)", "rakip.{0,30}(internet|web|site|katalog|basin|ilan|aciklama).{0,20}(izledik|inceledik|takip)", "etik.{0,20}(kural|ilke|uyum|denetim)", "seffaf.{0,20}(rekabet|surecler?|ihale|teklif)", "(ihale|teklif).{0,30}(sartname.{0,10}uygun|etik|seffaf|kendi maliyet)", "hukuka.{0,20}(uygun|aykiri degil|gore)", "(maliyet|enflasyon|kur|hammadde).{0,25}(artis|artigi|nedeniyle).{0,30}(zam|fiyat)", "piyasa.{0,20}kosullar.{0,20}(dogrultusunda|nedeniyle|gore).{0,20}(fiyat|karar)", "bayi.{0,30}(kendi arasinda|birbirine|ic kanal).{0,30}(fiyat kirma|rekabet|denge)", "dagitim.{0,20}(disiplin|kanal|duzeni).{0,20}(icin|amacli|saglamak)", "minimum.{0,10}(satis|perakende).{0,10}fiyat.{0,20}(bayi|kanal|dagitim)", "uzmanlas.{0,20}(anlasma|sozlesme|isbirligi|modeli)", "(komponent|parca|yari mamul|hammadde).{0,30}(tedarik|uretim).{0,30}(anlasma|isbirligi|sozlesme)", "tedarik.{0,20}(zinciri|isbirligi|sozlesme).{0,30}(uretim|verimlilik|maliyet)", "(lojistik|kapasite|teslimat|depo|stok).{0,25}(sorunu|nedeniyle|yetersizligi).{0,30}(sinirla|kisitla|duraksama|gecikme)", "gecici.{0,15}olarak.{0,25}(sinirla|kisitla|durdur|ertele|yavaslat)", "operasyonel.{0,20}(sorun|kapasite|kisit).{0,20}(nedeniyle|kaynaklı)"];
+
+function norm(t){
+  return t.replace(/İ/g,'i').replace(/I/g,'i')
+    .toLowerCase()
+    .replace(/ı/g,'i').replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ş/g,'s')
+    .replace(/ö/g,'o').replace(/ç/g,'c').replace(/Ğ/g,'g')
+    .replace(/Ü/g,'u').replace(/Ş/g,'s').replace(/Ö/g,'o').replace(/Ç/g,'c')
+    .replace(/[^\w\s]/g,' ').replace(/\s+/g,' ').trim();
+}
+function tokens(t){
+  const w=t.split(/\s+/).filter(x=>x);
+  const r=[...w];
+  for(let i=0;i<w.length-1;i++) r.push(w[i]+' '+w[i+1]);
+  for(let i=0;i<w.length-2;i++) r.push(w[i]+' '+w[i+1]+' '+w[i+2]);
+  return r;
+}
+function tfSub(toks,term){
+  const n=toks.filter(x=>x===term).length;
+  return n>0?1+Math.log(n):0;
+}
+function sigmoid(x){return 1/(1+Math.exp(-x*2));}
+
+function predict(raw){
+  if(!raw||raw.trim().length<3) return null;
+  const t0=performance.now();
+  const txt=norm(raw);
+  const toks=tokens(txt);
+
+  // TF-IDF skoru
+  let dec=IC;
+  const sigs=[];
+  for(const[term,w] of Object.entries(W)){
+    const tf=tfSub(toks,term);
+    if(tf>0){
+      const c=w*tf; dec+=c;
+      if(Math.abs(c)>0.04) sigs.push({term,w,contrib:c});
+    }
+  }
+
+  // Bağlam skoru — hibrit kural motoru
+  const violHits=[], safeHits=[];
+  for(const p of VIOL_PAT){
+    if(new RegExp(p).test(txt)){ dec+=2.5; violHits.push(p.substring(0,40)+'…'); }
+  }
+  for(const p of SAFE_PAT){
+    if(new RegExp(p).test(txt)){ dec-=2.0; safeHits.push(p.substring(0,40)+'…'); }
+  }
+  // Güçlü negasyon bonusları
+  if(/rakiplerle.{0,10}hicbir/.test(txt)) dec -= 3.5;
+  if(/rakiplerle.{0,50}(yok|olmadi|hayir|bulunmuyor)/.test(txt)) dec -= 2.8;
+  if(/hicbir.{0,20}(bilgi|koordinasyon|anlasma).{0,20}(yok|olmadi|yapilmadi)/.test(txt)) dec -= 2.5;
+  if(/tamamen.{0,20}(kendi|ic|lojistik|kapasite|bagımsız)/.test(txt)) dec -= 2.0;
+  if(/yalnizca.{0,25}kendi.{0,30}(maliyet|hedef|marj)/.test(txt)) dec -= 2.0;
+  if(/uzmanlas.{0,20}(anlasma|isbirligi|sozlesme)/.test(txt)) dec -= 2.5;
+  if(/dagitim.{0,20}(disiplin|kanal|duzeni)/.test(txt)) dec -= 1.8;
+  if(/(lojistik|kapasite).{0,25}(sorunu|nedeniyle).{0,30}(sinirla|kisitla)/.test(txt)) dec -= 2.2;
+  if(/gecici.{0,15}olarak.{0,25}(sinirla|kisitla|ertele)/.test(txt)) dec -= 1.8;
+
+  const prob=sigmoid(dec);
+  const ms=(performance.now()-t0).toFixed(2);
+  sigs.sort((a,b)=>Math.abs(b.contrib)-Math.abs(a.contrib));
+  return {prob,dec,sigs:sigs.slice(0,15),violHits,safeHits,ms};
+}
+
+let tmr=null;
+document.getElementById('mb').addEventListener('input',()=>{
+  const txt=document.getElementById('mb').value;
+  document.getElementById('cc').textContent=txt.length+' karakter';
+  if(txt.trim().length<3){reset();return;}
+  document.getElementById('ar').classList.add('show');
+  clearTimeout(tmr);
+  tmr=setTimeout(()=>{
+    const r=predict(txt);
+    document.getElementById('lv').textContent=r.ms+' ms';
+    document.getElementById('ar').classList.remove('show');
+    render(r);
+  },280);
+});
+
+function render(r){
+  const p=r.prob,pct=Math.round(p*100);
+  const lv=p>=0.75?'high':p>=0.50?'med':'low';
+  const lb=p>=0.75?'YÜKSEK RİSK (≥75%)':p>=0.50?'ORTA RİSK (50-74%)':'DÜŞÜK RİSK (<50%)';
+  document.getElementById('emp').style.display='none';
+  const rc=document.getElementById('rc');
+  rc.style.display='block'; rc.className='rc '+lv;
+  const rn=document.getElementById('rn');
+  animN(rn,parseInt(rn.textContent)||0,pct,400);
+  rn.className='rn '+lv;
+  document.getElementById('rv').textContent=lb; document.getElementById('rv').className='rv '+lv;
+  setTimeout(()=>{document.getElementById('rb').style.width=pct+'%';document.getElementById('rb').className='rb '+lv;},50);
+  document.getElementById('sd').textContent=
+    'TF-IDF: '+r.dec.toFixed(2)+' → P(ihlal)='+p.toFixed(3)+
+    (r.violHits.length?' | Bağlam ihlal: '+r.violHits.length:'') +
+    (r.safeHits.length?' | Bağlam masum: '+r.safeHits.length:'');
+  // Bağlam tag'leri
+  const ctx=document.getElementById('ctx'); ctx.innerHTML='';
+  for(const h of r.violHits){const s=document.createElement('span');s.className='ctx-tag viol';s.textContent='⚠ '+h;ctx.appendChild(s);}
+  for(const h of r.safeHits){const s=document.createElement('span');s.className='ctx-tag safe';s.textContent='✓ '+h;ctx.appendChild(s);}
+  // Signals
+  const sw=document.getElementById('sw'); sw.innerHTML='';
+  document.getElementById('sigl').className='sl show';
+  if(r.sigs.length===0){sw.innerHTML='<span class="st cool">sinyal yok</span>';}
+  else for(const s of r.sigs){
+    const sp=document.createElement('span');
+    sp.className='st '+(s.contrib>0.25?'hot':s.contrib>0.05?'warm':'cool');
+    sp.title='katkı: '+s.contrib.toFixed(3); sp.textContent=s.term; sw.appendChild(sp);
+  }
+  // Verdict
+  const vd=document.getElementById('vd');
+  vd.className='vd show '+(p>=0.75?'danger':p>=0.50?'warn':'clear');
+  if(p>=0.75){document.getElementById('vi').textContent='⚠';document.getElementById('vts').textContent='Potansiyel Mevzuat İhlali';document.getElementById('vds').textContent='4054 sayılı Kanun kapsamında risk yüksek (≥75%). Hukuk departmanına danışın.';}
+  else if(p>=0.50){document.getElementById('vi').textContent='◈';document.getElementById('vts').textContent='Dikkat — İnceleme Önerilir';document.getElementById('vds').textContent='Bazı ifadeler şüpheli görünüyor, gözden geçirmeniz önerilir.';}
+  else{document.getElementById('vi').textContent='✓';document.getElementById('vts').textContent='İhlal Tespit Edilmedi';document.getElementById('vds').textContent='Bağlam analizi dahil, bu mail temiz sınıflandırıldı.';}
+}
+
+function reset(){
+  document.getElementById('emp').style.display='block';
+  document.getElementById('rc').style.display='none';
+  document.getElementById('sigl').className='sl';
+  document.getElementById('sw').innerHTML='';
+  document.getElementById('vd').className='vd';
+  document.getElementById('ar').classList.remove('show');
+  document.getElementById('lv').textContent='—';
+}
+function animN(el,from,to,dur){
+  const t0=performance.now();
+  (function s(now){const p=Math.min((now-t0)/dur,1);el.textContent=Math.round(from+(to-from)*p);if(p<1)requestAnimationFrame(s);})( t0);
+}
+const S={
+  f:{to:'satis@s.com',sj:'Fiyat Koordinasyonu',b:'Selam,\n\nRakip firmalarla dün görüştük ve liste fiyatlarına %15 zam yapma konusunda mutabık kaldık. Eş zamanlı olarak yeni fiyatları sisteme giriyoruz.'},
+  p:{to:'bolge@s.com',sj:'Bölge Mutabakatı',b:'Caner Bey,\n\nPazarın bölüşülmesini netleştirdik. İstanbul bizim, Anadolu yakası Beta firmasının. Rakibimizin mevcut müşterilerine artık teklif vermeyeceğiz.'},
+  i:{to:'ihale@s.com',sj:'İhale',b:'Merhaba,\n\nYarınki ihale için Alfa ve Beta ile görüştüm. Biz en düşük teklifi vereceğiz, onlar göstermelik teklif sunacak. Danışıklı planımız hazır.'},
+  b:{to:'str@s.com',sj:'Bilgi Alışverişi',b:'Selam,\n\nRakibimiz Alfa ile gizli bilgi alışverişi yaptık. Kapasite oranlarını paylaştılar, biz de verdik. Kâr marjlarımızı birbirimize raporlayacağız.'},
+  m1:{to:'muh@s.com',sj:'Fiyat Revizyonu',b:'Merhaba,\n\nEnflasyon ve maliyet artışı nedeniyle ürünlerimize %8 zam yapmayı planlıyoruz. Bu tamamen kendi maliyet analizimize dayanan bağımsız bir karar.\n\nİyi çalışmalar.'},
+  m2:{to:'str@s.com',sj:'Pazar Araştırması',b:'Merhaba,\n\nRakip firmaların internet sitelerinde yayımladıkları fiyat listelerini inceledim. Bu kamuya açık verilere göre bizim fiyatlarımız hâlâ rekabetçi görünüyor. Kendi fiyatlandırma kararımızı bağımsız olarak alacağız.'},
+  m3:{to:'ihale@s.com',sj:'İhale Hazırlık',b:'Veli Bey,\n\nŞartnameyi inceledim, ürünlerimiz tamamen uygun. Şirket politikamız gereği etik dışı hiçbir ihale sürecinde yer almıyoruz. Teklifimizi şeffaf rekabet ilkeleriyle ve kendi maliyet hesaplarımıza dayanarak hazırladık.'}
+};
+function ls(k){const s=S[k];document.getElementById('toF').value=s.to;document.getElementById('sjF').value=s.sj;document.getElementById('mb').value=s.b;document.getElementById('cc').textContent=s.b.length+' karakter';const r=predict(s.b);document.getElementById('lv').textContent=r.ms+' ms';render(r);}
+function doClear(){['toF','sjF','mb'].forEach(id=>document.getElementById(id).value='');document.getElementById('cc').textContent='0 karakter';reset();}
+function doSend(){const txt=document.getElementById('mb').value;if(!txt.trim())return;const r=predict(txt);if(r.prob>=0.75)alert('⚠ YÜKSEK RİSK! P='+(r.prob*100).toFixed(0)+'%');else if(r.prob>=0.50){if(confirm('◈ ORTA RİSK ('+(r.prob*100).toFixed(0)+'%). Göndermek ister misiniz?'))alert('Gönderildi.');}else alert('✓ Temiz. Gönderildi.');}
+</script>
+</body>
+</html>
