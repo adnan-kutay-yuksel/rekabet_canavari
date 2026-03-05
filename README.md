@@ -1,0 +1,1 @@
+# rekabet_canavari
