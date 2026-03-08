@@ -34,67 +34,118 @@ class RekabetAnaliz {
         }
     }
     
-    async loadData() {
-        try {
-            // Embedding'leri yükle
-            const embResponse = await fetch('web_model/sample_embeddings.npy');
-            const embBuffer = await embResponse.arrayBuffer();
-            this.sampleEmbeddings = this.parseNPY(embBuffer);
-            
-            // Sample labels
-            const labelsResponse = await fetch('web_model/sample_labels.json');
-            this.sampleLabels = await labelsResponse.json();
-            
-            // Merkez noktaları
-            const ihlalResponse = await fetch('web_model/ihlal_merkez.npy');
-            const ihlalBuffer = await ihlalResponse.arrayBuffer();
-            this.ihlalMerkez = this.parseNPY(ihlalBuffer);
-            
-            const masumResponse = await fetch('web_model/masum_merkez.npy');
-            const masumBuffer = await masumResponse.arrayBuffer();
-            this.masumMerkez = this.parseNPY(masumBuffer);
-            
-            // Cümleler ve etiketler
-            const sentencesResponse = await fetch('web_model/sentences.json');
-            this.sentences = await sentencesResponse.json();
-            
-            const labelsResponse2 = await fetch('web_model/labels.json');
-            this.labels = await labelsResponse2.json();
-            
-            const categoriesResponse = await fetch('web_model/categories.json');
-            this.categories = await categoriesResponse.json();
-            
-        } catch (error) {
-            console.error('Veri yükleme hatası:', error);
-            throw error;
-        }
-    }
-    
-    parseNPY(buffer) {
-        // Basit NPY parser (float32 array için)
-        const view = new DataView(buffer);
-        const headerLen = view.getUint16(8, true);
-        const header = new TextDecoder().decode(new Uint8Array(buffer, 10, headerLen));
-        const shape = header.match(/\((\d+),?\s*(\d*)\)/);
+async loadData() {
+    try {
+        console.log('📂 Veriler yükleniyor...');
         
-        if (shape) {
-            const rows = parseInt(shape[1]);
-            const cols = shape[2] ? parseInt(shape[2]) : 1;
-            const dataStart = 10 + headerLen + (headerLen % 2);
-            const data = new Float32Array(buffer, dataStart);
-            
-            if (cols === 1) {
-                return Array.from(data);
-            } else {
-                const result = [];
-                for (let i = 0; i < rows; i++) {
-                    result.push(Array.from(data.slice(i * cols, (i + 1) * cols)));
-                }
-                return result;
-            }
-        }
-        return null;
+        // 1. SAMPLE EMBEDDINGS (örnek noktalar)
+        const embResponse = await fetch('web_model/sample_embeddings.npy');
+        if (!embResponse.ok) throw new Error('sample_embeddings.npy bulunamadı!');
+        const embBuffer = await embResponse.arrayBuffer();
+        this.sampleEmbeddings = this.parseNPY(embBuffer);
+        console.log('✅ sample_embeddings yüklendi');
+        
+        // 2. SAMPLE LABELS
+        const labelsResponse = await fetch('web_model/sample_labels.json');
+        if (!labelsResponse.ok) throw new Error('sample_labels.json bulunamadı!');
+        this.sampleLabels = await labelsResponse.json();
+        console.log('✅ sample_labels yüklendi');
+        
+        // 3. İHLAL MERKEZ
+        const ihlalResponse = await fetch('web_model/ihlal_merkez.npy');
+        if (!ihlalResponse.ok) throw new Error('ihlal_merkez.npy bulunamadı!');
+        const ihlalBuffer = await ihlalResponse.arrayBuffer();
+        this.ihlalMerkez = this.parseNPY(ihlalBuffer);
+        console.log('✅ ihlal_merkez yüklendi');
+        
+        // 4. MASUM MERKEZ
+        const masumResponse = await fetch('web_model/masum_merkez.npy');
+        if (!masumResponse.ok) throw new Error('masum_merkez.npy bulunamadı!');
+        const masumBuffer = await masumResponse.arrayBuffer();
+        this.masumMerkez = this.parseNPY(masumBuffer);
+        console.log('✅ masum_merkez yüklendi');
+        
+        // 5. TÜM CÜMLELER
+        const sentencesResponse = await fetch('web_model/sentences.json');
+        if (!sentencesResponse.ok) throw new Error('sentences.json bulunamadı!');
+        this.sentences = await sentencesResponse.json();
+        console.log('✅ sentences yüklendi');
+        
+        // 6. TÜM LABELS
+        const allLabelsResponse = await fetch('web_model/labels.json');
+        if (!allLabelsResponse.ok) throw new Error('labels.json bulunamadı!');
+        this.labels = await allLabelsResponse.json();
+        console.log('✅ labels yüklendi');
+        
+        // 7. KATEGORİLER
+        const categoriesResponse = await fetch('web_model/categories.json');
+        if (!categoriesResponse.ok) throw new Error('categories.json bulunamadı!');
+        this.categories = await categoriesResponse.json();
+        console.log('✅ categories yüklendi');
+        
+        console.log('🎉 TÜM VERİLER BAŞARIYLA YÜKLENDİ!');
+        
+    } catch (error) {
+        console.error('❌ Veri yükleme hatası:', error);
+        // Detaylı hata mesajı göster
+        document.getElementById('resultSection').classList.remove('hidden');
+        document.getElementById('resultSection').innerHTML = `
+            <div class="error-message" style="background: #ffebee; padding: 20px; border-radius: 10px;">
+                <h3 style="color: #c62828;">❌ Veri Yükleme Hatası</h3>
+                <p style="margin: 10px 0;">${error.message}</p>
+                <p style="font-size: 0.9em; color: #666;">Dosyaların şu adreste olduğunu kontrol edin:</p>
+                <code style="background: #f5f5f5; padding: 5px; display: block; margin: 10px 0;">
+                    https://adnan-kutay-yuksel.github.io/rekabet_canavari/web_model/
+                </code>
+                <button onclick="location.reload()" style="background: #c62828; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-top: 10px;">
+                    🔄 Sayfayı Yenile
+                </button>
+            </div>
+        `;
+        throw error;
     }
+}
+    
+parseNPY(buffer) {
+    try {
+        console.log('NPY dosyası parse ediliyor, boyut:', buffer.byteLength);
+        const view = new DataView(buffer);
+        const magic = view.getUint8(0);
+        if (magic !== 0x93) {
+            throw new Error('Geçersiz NPY formatı');
+        }
+        
+        const headerLen = view.getUint16(8, true);
+        const headerBytes = new Uint8Array(buffer, 10, headerLen);
+        const header = new TextDecoder().decode(headerBytes);
+        console.log('NPY header:', header);
+        
+        const shapeMatch = header.match(/\((\d+),?\s*(\d*)\)/);
+        if (!shapeMatch) {
+            throw new Error('NPY shape bulunamadı');
+        }
+        
+        const rows = parseInt(shapeMatch[1]);
+        const cols = shapeMatch[2] ? parseInt(shapeMatch[2]) : 1;
+        const dataStart = 10 + headerLen + (headerLen % 2 ? 1 : 0);
+        const data = new Float32Array(buffer, dataStart);
+        
+        console.log(`NPY: ${rows} satır, ${cols} sütun`);
+        
+        if (cols === 1) {
+            return Array.from(data);
+        } else {
+            const result = [];
+            for (let i = 0; i < rows; i++) {
+                result.push(Array.from(data.slice(i * cols, (i + 1) * cols)));
+            }
+            return result;
+        }
+    } catch (error) {
+        console.error('NPY parse hatası:', error);
+        return [];
+    }
+}
     
     cosineSimilarity(vecA, vecB) {
         let dotProduct = 0;
