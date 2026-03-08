@@ -35,50 +35,53 @@ class RekabetAnaliz {
     }
     
 async loadData() {
+    // Dosyaların gerçek adresi (raw.githubusercontent)
+    const baseUrl = 'https://raw.githubusercontent.com/adnan-kutay-yuksel/rekabet_canavari/master/web_model/';
+    
     try {
         console.log('📂 Veriler yükleniyor...');
         
         // 1. SAMPLE EMBEDDINGS (örnek noktalar)
-        const embResponse = await fetch('web_model/sample_embeddings.npy');
+        const embResponse = await fetch(baseUrl + 'sample_embeddings.npy');
         if (!embResponse.ok) throw new Error('sample_embeddings.npy bulunamadı!');
         const embBuffer = await embResponse.arrayBuffer();
         this.sampleEmbeddings = this.parseNPY(embBuffer);
         console.log('✅ sample_embeddings yüklendi');
         
         // 2. SAMPLE LABELS
-        const labelsResponse = await fetch('web_model/sample_labels.json');
+        const labelsResponse = await fetch(baseUrl + 'sample_labels.json');
         if (!labelsResponse.ok) throw new Error('sample_labels.json bulunamadı!');
         this.sampleLabels = await labelsResponse.json();
         console.log('✅ sample_labels yüklendi');
         
         // 3. İHLAL MERKEZ
-        const ihlalResponse = await fetch('web_model/ihlal_merkez.npy');
+        const ihlalResponse = await fetch(baseUrl + 'ihlal_merkez.npy');
         if (!ihlalResponse.ok) throw new Error('ihlal_merkez.npy bulunamadı!');
         const ihlalBuffer = await ihlalResponse.arrayBuffer();
         this.ihlalMerkez = this.parseNPY(ihlalBuffer);
         console.log('✅ ihlal_merkez yüklendi');
         
         // 4. MASUM MERKEZ
-        const masumResponse = await fetch('web_model/masum_merkez.npy');
+        const masumResponse = await fetch(baseUrl + 'masum_merkez.npy');
         if (!masumResponse.ok) throw new Error('masum_merkez.npy bulunamadı!');
         const masumBuffer = await masumResponse.arrayBuffer();
         this.masumMerkez = this.parseNPY(masumBuffer);
         console.log('✅ masum_merkez yüklendi');
         
         // 5. TÜM CÜMLELER
-        const sentencesResponse = await fetch('web_model/sentences.json');
+        const sentencesResponse = await fetch(baseUrl + 'sentences.json');
         if (!sentencesResponse.ok) throw new Error('sentences.json bulunamadı!');
         this.sentences = await sentencesResponse.json();
         console.log('✅ sentences yüklendi');
         
         // 6. TÜM LABELS
-        const allLabelsResponse = await fetch('web_model/labels.json');
+        const allLabelsResponse = await fetch(baseUrl + 'labels.json');
         if (!allLabelsResponse.ok) throw new Error('labels.json bulunamadı!');
         this.labels = await allLabelsResponse.json();
         console.log('✅ labels yüklendi');
         
         // 7. KATEGORİLER
-        const categoriesResponse = await fetch('web_model/categories.json');
+        const categoriesResponse = await fetch(baseUrl + 'categories.json');
         if (!categoriesResponse.ok) throw new Error('categories.json bulunamadı!');
         this.categories = await categoriesResponse.json();
         console.log('✅ categories yüklendi');
