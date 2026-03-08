@@ -37,31 +37,31 @@ class RekabetAnaliz {
     async loadData() {
         try {
             // Embedding'leri yükle
-            const embResponse = await fetch('model/sample_embeddings.npy');
+            const embResponse = await fetch('web_model/sample_embeddings.npy');
             const embBuffer = await embResponse.arrayBuffer();
             this.sampleEmbeddings = this.parseNPY(embBuffer);
             
             // Sample labels
-            const labelsResponse = await fetch('model/sample_labels.json');
+            const labelsResponse = await fetch('web_model/sample_labels.json');
             this.sampleLabels = await labelsResponse.json();
             
             // Merkez noktaları
-            const ihlalResponse = await fetch('model/ihlal_merkez.npy');
+            const ihlalResponse = await fetch('web_model/ihlal_merkez.npy');
             const ihlalBuffer = await ihlalResponse.arrayBuffer();
             this.ihlalMerkez = this.parseNPY(ihlalBuffer);
             
-            const masumResponse = await fetch('model/masum_merkez.npy');
+            const masumResponse = await fetch('web_model/masum_merkez.npy');
             const masumBuffer = await masumResponse.arrayBuffer();
             this.masumMerkez = this.parseNPY(masumBuffer);
             
             // Cümleler ve etiketler
-            const sentencesResponse = await fetch('model/sentences.json');
+            const sentencesResponse = await fetch('web_model/sentences.json');
             this.sentences = await sentencesResponse.json();
             
-            const labelsResponse2 = await fetch('model/labels.json');
+            const labelsResponse2 = await fetch('web_model/labels.json');
             this.labels = await labelsResponse2.json();
             
-            const categoriesResponse = await fetch('model/categories.json');
+            const categoriesResponse = await fetch('web_model/categories.json');
             this.categories = await categoriesResponse.json();
             
         } catch (error) {
