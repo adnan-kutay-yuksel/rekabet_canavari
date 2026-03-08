@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rekabet Hukuku İhlal Analiz Aracı</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚖️ Rekabet Hukuku İhlal Analiz Aracı</h1>
+            <p>4054 sayılı Kanun kapsamında e-posta metinlerini analiz edin</p>
+        </header>
+
+        <main>
+            <div class="input-section">
+                <textarea id="textInput" placeholder="Analiz edilecek metni buraya yazın..." rows="4"></textarea>
+                <div class="button-group">
+                    <button id="analyzeBtn" class="primary">🔍 Metni Analiz Et</button>
+                    <button id="clearBtn" class="secondary">🗑️ Temizle</button>
+                </div>
+            </div>
+
+            <div id="resultSection" class="result-section hidden">
+                <div class="result-card">
+                    <h2>Analiz Sonucu</h2>
+                    <div id="predictionBox" class="prediction-box">
+                        <span id="predictionIcon">⚖️</span>
+                        <span id="predictionText">Analiz yapılıyor...</span>
+                        <span id="confidenceScore"></span>
+                    </div>
+                    <div class="confidence-bar">
+                        <div id="confidenceFill" class="confidence-fill"></div>
+                    </div>
+                </div>
+
+                <div class="similar-sentences">
+                    <h3>📋 En Benzer 3 Eğitim Cümlesi</h3>
+                    <div id="similarList" class="similar-list"></div>
+                </div>
+            </div>
+
+            <div class="visualization-section">
+                <h3>📊 Eğitim Verisi Haritası</h3>
+                <canvas id="scatterChart"></canvas>
+                <div class="legend">
+                    <span class="legend-item red">🔴 İhlal (kırmızı)</span>
+                    <span class="legend-item blue">🔵 Masum (mavi)</span>
+                    <span class="legend-item yellow">🟡 Sizin metniniz</span>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>📌 Nedir?</h3>
+                <p>Bu araç, <strong>5000+ gerçek iş e-postası</strong> üzerinde eğitilmiş bir yapay zeka modeli kullanır. Yazdığınız metni analiz eder ve 4054 sayılı Rekabetin Korunması Hakkında Kanun kapsamında ihlal içerip içermediğini tahmin eder.</p>
+                <p>⚠️ <strong>Not:</strong> Bu bir ön değerlendirme aracıdır. Kesin hukuki görüş için mutlaka bir uzmana danışın.</p>
+            </div>
+        </main>
+
+        <footer>
+            <p>© 2024 - Rekabet Hukuku Analiz Aracı | v1.0</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
