@@ -3,66 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rekabet Hukuku İhlal Analiz Aracı</title>
+    <title>Rekabet Hukuku Analiz Paneli</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>⚖️ Rekabet Hukuku İhlal Analiz Aracı</h1>
-            <p>4054 sayılı Kanun kapsamında e-posta metinlerini analiz edin</p>
-        </header>
-
-        <main>
-            <div class="input-section">
-                <textarea id="textInput" placeholder="Analiz edilecek metni buraya yazın..." rows="4"></textarea>
-                <div class="button-group">
-                    <button id="analyzeBtn" class="primary">🔍 Metni Analiz Et</button>
-                    <button id="clearBtn" class="secondary">🗑️ Temizle</button>
+    <div class="page-shell">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-mark">§</div>
+                <div class="brand-text">
+                    <strong>RK Analiz</strong>
+                    <span>Uyum ve Ön İnceleme Paneli</span>
                 </div>
             </div>
 
-            <div id="resultSection" class="result-section hidden">
-                <div class="result-card">
-                    <h2>Analiz Sonucu</h2>
-                    <div id="predictionBox" class="prediction-box">
-                        <span id="predictionIcon">⚖️</span>
-                        <span id="predictionText">Analiz yapılıyor...</span>
-                        <span id="confidenceScore"></span>
+            <nav class="side-nav">
+                <a href="#analysis" class="active">Metin Analizi</a>
+                <a href="#map">Veri Haritası</a>
+                <a href="#about">Açıklama</a>
+            </nav>
+
+            <div class="sidebar-note">
+                <span class="note-label">Kapsam</span>
+                <p>4054 sayılı Kanun çerçevesinde yazılı iş iletişimlerinin ön değerlendirilmesi için tasarlanmıştır.</p>
+            </div>
+        </aside>
+
+        <div class="content-area">
+            <header class="topbar">
+                <div>
+                    <p class="eyebrow">Rekabet uyumu</p>
+                    <h1>Rekabet Hukuku Analiz Paneli</h1>
+                </div>
+                <div class="topbar-badge">v1.0</div>
+            </header>
+
+            <main class="dashboard">
+                <section id="analysis" class="panel hero-panel">
+                    <div class="panel-head">
+                        <div>
+                            <p class="section-kicker">Metin girişi</p>
+                            <h2>İletişim içeriğini analiz edin</h2>
+                        </div>
+                        <p class="section-desc">
+                            E-posta, mesajlaşma uygulaması yazışması veya benzeri metinleri tek satır ya da normal formatta girerek ön analiz yapabilirsiniz.
+                        </p>
                     </div>
-                    <div class="confidence-bar">
-                        <div id="confidenceFill" class="confidence-fill"></div>
+
+                    <div class="input-wrap">
+                        <label for="textInput" class="input-label">Analiz edilecek metin</label>
+                        <textarea id="textInput" placeholder="Örnek: Merhaba, fiyat güncellemesi ve bölgesel teklif dağılımı hakkında kısa bir değerlendirme paylaşmak istiyorum..." rows="7"></textarea>
+
+                        <div class="button-group">
+                            <button id="analyzeBtn" class="btn btn-primary">Metni Analiz Et</button>
+                            <button id="clearBtn" class="btn btn-secondary">Temizle</button>
+                        </div>
                     </div>
-                </div>
+                </section>
 
-                <div class="similar-sentences">
-                    <h3>📋 En Benzer 3 Eğitim Cümlesi</h3>
-                    <div id="similarList" class="similar-list"></div>
-                </div>
-            </div>
+                <section id="resultSection" class="panel result-panel hidden">
+                    <div class="panel-head compact">
+                        <div>
+                            <p class="section-kicker">Sonuç</p>
+                            <h2>Analiz özeti</h2>
+                        </div>
+                    </div>
 
-            <div class="visualization-section">
-                <h3>📊 Eğitim Verisi Haritası</h3>
-                <canvas id="scatterChart"></canvas>
-                <div class="legend">
-                    <span class="legend-item red">🔴 İhlal (kırmızı)</span>
-                    <span class="legend-item blue">🔵 Masum (mavi)</span>
-                    <span class="legend-item yellow">🟡 Sizin metniniz</span>
-                </div>
-            </div>
+                    <div class="result-grid">
+                        <div class="result-card main-result">
+                            <div class="result-top">
+                                <span class="result-chip">Model Tahmini</span>
+                            </div>
 
-            <div class="info-section">
-                <h3>📌 Nedir?</h3>
-                <p>Bu araç, <strong>5000+ gerçek iş e-postası</strong> üzerinde eğitilmiş bir yapay zeka modeli kullanır. Yazdığınız metni analiz eder ve 4054 sayılı Rekabetin Korunması Hakkında Kanun kapsamında ihlal içerip içermediğini tahmin eder.</p>
-                <p>⚠️ <strong>Not:</strong> Bu bir ön değerlendirme aracıdır. Kesin hukuki görüş için mutlaka bir uzmana danışın.</p>
-            </div>
-        </main>
+                            <div id="predictionBox" class="prediction-box">
+                                <div class="prediction-left">
+                                    <span id="predictionIcon" class="prediction-icon">§</span>
+                                    <div>
+                                        <div id="predictionText" class="prediction-text">Analiz yapılıyor...</div>
+                                        <div class="prediction-subtext">Bu çıktı yalnızca ön değerlendirme niteliğindedir.</div>
+                                    </div>
+                                </div>
+                                <span id="confidenceScore" class="confidence-score"></span>
+                            </div>
 
-        <footer>
-            <p>© 2024 - Rekabet Hukuku Analiz Aracı | v1.0</p>
-        </footer>
+                            <div class="confidence-block">
+                                <div class="confidence-meta">
+                                    <span>Güven skoru</span>
+                                    <span id="confidenceLabel">0%</span>
+                                </div>
+                                <div class="confidence-bar">
+                                    <div id="confidenceFill" class="confidence-fill"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="result-card similar-card">
+                            <div class="result-top">
+                                <span class="result-chip">Karşılaştırma</span>
+                            </div>
+                            <h3>En benzer 3 eğitim cümlesi</h3>
+                            <div id="similarList" class="similar-list"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="map" class="panel chart-panel">
+                    <div class="panel-head">
+                        <div>
+                            <p class="section-kicker">Görselleştirme</p>
+                            <h2>Eğitim verisi haritası</h2>
+                        </div>
+                        <p class="section-desc">
+                            Eğitim örneklerinin dağılımı ve kullanıcı metninin konumu bu grafikte gösterilir.
+                        </p>
+                    </div>
+
+                    <div class="chart-wrap">
+                        <canvas id="scatterChart"></canvas>
+                    </div>
+
+                    <div class="legend">
+                        <div class="legend-item">
+                            <span class="dot dot-danger"></span>
+                            <span>İhlal</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="dot dot-safe"></span>
+                            <span>Masum</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="dot dot-user"></span>
+                            <span>Sizin metniniz</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="about" class="panel info-panel">
+                    <div class="panel-head">
+                        <div>
+                            <p class="section-kicker">Bilgilendirme</p>
+                            <h2>Bu araç ne yapar?</h2>
+                        </div>
+                    </div>
+
+                    <div class="info-grid">
+                        <div class="info-box">
+                            <h3>Çalışma mantığı</h3>
+                            <p>
+                                Sistem, eğitim verisinden öğrenilen örüntüler üzerinden metnin rekabet hukuku açısından risk işareti taşıyıp taşımadığını tahmin eder.
+                            </p>
+                        </div>
+
+                        <div class="info-box">
+                            <h3>Kullanım amacı</h3>
+                            <p>
+                                İç denetim, eğitim, örnek veri sınıflandırması ve ön filtreleme süreçlerinde destekleyici araç olarak kullanılabilir.
+                            </p>
+                        </div>
+
+                        <div class="info-box warning">
+                            <h3>Önemli not</h3>
+                            <p>
+                                Bu panel hukuki mütalaa yerine geçmez. Kesin değerlendirme için uzman hukukçu veya rekabet hukuku danışmanına başvurulmalıdır.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+            </main>
+
+            <footer class="footer">
+                <span>© 2026 Rekabet Hukuku Analiz Paneli</span>
+                <span>Kurumsal Ön İnceleme Aracı</span>
+            </footer>
+        </div>
     </div>
 
     <script src="script.js"></script>
